@@ -1,0 +1,2493 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduClass - Sistema de Gestão Escolar</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="stylesheet" href="style.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eef8ff',
+                            100: '#dff4f3',
+                            500: '#174f9c',
+                            600: '#174f9c',
+                            700: '#123f7d'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-sans min-h-screen">
+
+<!-- ================= LOGIN ================= -->
+
+<div id="authContainer"
+     class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-600 to-indigo-900">
+
+    <div class="bg-white dark:bg-gray-800 w-full max-w-md rounded-2xl shadow-2xl p-8">
+
+        <div class="text-center mb-6">
+            <div class="educlass-login-logo">
+                <img src="logo-educlass.png" alt="EduClass" class="educlass-logo-login">
+            </div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+                Plataforma de Gestão do Professor
+            </p>
+        </div>
+
+        <!-- LOGIN -->
+        <form id="loginForm" onsubmit="handleAuth(event, 'login')" class="space-y-4">
+
+            <div>
+                <label for="loginEmail" class="block text-sm font-medium mb-1">E-mail</label>
+                <input
+                    type="email"
+                    id="loginEmail"
+                    placeholder="professor@educlass.com"
+                    autocomplete="email"
+                    required
+                    class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+
+            <div>
+                <label for="loginPassword" class="block text-sm font-medium mb-1">Senha</label>
+                <input
+                    type="password"
+                    id="loginPassword"
+                    placeholder="Digite sua senha"
+                    autocomplete="current-password"
+                    minlength="6"
+                    required
+                    class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+
+            <div id="loginMessage" class="hidden text-sm rounded-lg p-3"></div>
+
+            <button
+                type="submit"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition">
+                Entrar no Sistema
+            </button>
+
+            <div class="text-center text-sm text-gray-500">
+                Não tem uma conta?
+                <button type="button" onclick="toggleAuthMode()" class="text-blue-600 font-semibold hover:underline">
+                    Cadastre-se
+                </button>
+            </div>
+
+        </form>
+
+        <!-- CADASTRO -->
+        <form id="registerForm" onsubmit="handleAuth(event, 'register')" class="space-y-4 hidden">
+
+            <div>
+                <label for="regName" class="block text-sm font-medium mb-1">Nome Completo</label>
+                <input
+                    type="text"
+                    id="regName"
+                    placeholder="Prof. Marcia Barbosa"
+                    autocomplete="name"
+                    minlength="3"
+                    required
+                    class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+
+            <div>
+                <label for="regEmail" class="block text-sm font-medium mb-1">E-mail</label>
+                <input
+                    type="email"
+                    id="regEmail"
+                    placeholder="professor@educlass.com"
+                    autocomplete="email"
+                    required
+                    class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+
+            <div>
+                <label for="regPassword" class="block text-sm font-medium mb-1">Senha</label>
+                <input
+                    type="password"
+                    id="regPassword"
+                    placeholder="Mínimo de 6 caracteres"
+                    autocomplete="new-password"
+                    minlength="6"
+                    required
+                    class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+
+            <div id="registerMessage" class="hidden text-sm rounded-lg p-3"></div>
+
+            <button
+                type="submit"
+                class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg transition">
+                Criar Conta
+            </button>
+
+            <div class="text-center text-sm text-gray-500">
+                Já possui conta?
+                <button type="button" onclick="toggleAuthMode()" class="text-blue-600 font-semibold hover:underline">
+                    Fazer Login
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+
+<!-- ================= SISTEMA ================= -->
+
+<div id="appContainer" class="hidden min-h-screen flex flex-col md:flex-row">
+
+    <!-- SIDEBAR -->
+
+    <aside class="w-full md:w-64 bg-white dark:bg-gray-800
+                  border-r border-gray-200 dark:border-gray-700">
+
+        <div class="p-6 flex items-center justify-between border-b">
+
+            <div class="educlass-sidebar-brand">
+                <img src="logo-educlass.png"
+                     alt="EduClass"
+                     class="educlass-logo-sidebar">
+            </div>
+
+            <button
+                onclick="toggleDarkMode()"
+                class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+
+                <i class="fa-solid fa-moon dark:hidden"></i>
+                <i class="fa-solid fa-sun hidden dark:block text-yellow-400"></i>
+
+            </button>
+
+        </div>
+
+        <!-- PROFESSOR -->
+
+        <div class="p-4 border-b flex items-center space-x-3">
+
+            <div
+                id="userAvatar"
+                class="w-10 h-10 rounded-full bg-blue-500
+                       text-white font-bold flex items-center justify-center">
+
+                P
+
+            </div>
+
+            <div>
+
+                <h4 id="userName" class="font-semibold text-sm">
+                    Professor
+                </h4>
+
+                <p id="userEmail"
+                   class="text-xs text-gray-500">
+                    professor@educlass.com
+                </p>
+
+            </div>
+
+        </div>
+
+        <!-- MENU -->
+
+        <nav class="p-4 space-y-1">
+
+            <button onclick="switchTab('dashboard')"
+                    id="nav-dashboard"
+                    class="nav-btn active w-full flex items-center
+                           space-x-3 px-4 py-3 rounded-xl
+                           text-blue-600 bg-blue-50">
+
+                <i class="fa-solid fa-chart-pie w-5"></i>
+                <span>Dashboard</span>
+
+            </button>
+
+            <button onclick="switchTab('turmas')"
+                    id="nav-turmas"
+                    class="nav-btn w-full flex items-center space-x-3
+                           px-4 py-3 rounded-xl text-gray-600
+                           hover:bg-gray-100">
+
+                <i class="fa-solid fa-users w-5"></i>
+                <span>Turmas</span>
+
+            </button>
+
+            <button onclick="switchTab('chamada')"
+                    id="nav-chamada"
+                    class="nav-btn w-full flex items-center space-x-3
+                           px-4 py-3 rounded-xl text-gray-600
+                           hover:bg-gray-100">
+
+                <i class="fa-solid fa-clipboard-user w-5"></i>
+                <span>Chamada</span>
+
+            </button>
+
+            <button onclick="switchTab('avaliacoes')"
+                    id="nav-avaliacoes"
+                    class="nav-btn w-full flex items-center space-x-3
+                           px-4 py-3 rounded-xl text-gray-600
+                           hover:bg-gray-100">
+
+                <i class="fa-solid fa-file-pen w-5"></i>
+                <span>Avaliações & Notas</span>
+
+            </button>
+
+            <button onclick="switchTab('calendario')"
+                    id="nav-calendario"
+                    class="nav-btn w-full flex items-center space-x-3
+                           px-4 py-3 rounded-xl text-gray-600
+                           hover:bg-gray-100">
+
+                <i class="fa-solid fa-calendar-days w-5"></i>
+                <span>Calendário</span>
+
+            </button>
+
+            <button onclick="switchTab('relatorios')"
+                    id="nav-relatorios"
+                    class="nav-btn w-full flex items-center space-x-3
+                           px-4 py-3 rounded-xl text-gray-600
+                           hover:bg-gray-100">
+
+                <i class="fa-solid fa-chart-column w-5"></i>
+                <span>Relatórios</span>
+
+            </button>
+
+            <div class="pt-6 mt-6 border-t">
+
+                <button onclick="logout()"
+                        class="w-full flex items-center space-x-3
+                               px-4 py-3 rounded-xl text-red-600
+                               hover:bg-red-50">
+
+                    <i class="fa-solid fa-arrow-right-from-bracket w-5"></i>
+
+                    <span>Sair do Sistema</span>
+
+                </button>
+
+            </div>
+
+        </nav>
+
+    </aside>
+
+
+    <!-- ================= CONTEÚDO ================= -->
+
+    <main class="flex-1 p-6 md:p-8 overflow-y-auto">
+
+
+        <!-- DASHBOARD -->
+
+        <section id="tab-dashboard" class="tab-content space-y-6">
+
+            <div class="flex flex-col md:flex-row
+                        md:items-center justify-between gap-4">
+
+                <div>
+
+                    <h2 class="text-2xl font-bold">
+                        Visão Geral
+                    </h2>
+
+                    <p class="text-sm text-gray-500">
+                        Acompanhe os principais indicadores das suas turmas
+                    </p>
+
+                </div>
+
+                <button
+                    onclick="openModal('modalTurma')"
+                    class="bg-blue-600 hover:bg-blue-700 text-white
+                           px-4 py-2 rounded-xl">
+
+                    <i class="fa-solid fa-plus mr-2"></i>
+                    Nova Turma
+
+                </button>
+
+            </div>
+
+
+            <!-- CARDS -->
+
+            <div class="grid grid-cols-1 sm:grid-cols-2
+                        lg:grid-cols-4 gap-4">
+
+                <div class="metric-card">
+
+                    <div class="metric-icon bg-blue-100 text-blue-600">
+                        <i class="fa-solid fa-chalkboard"></i>
+                    </div>
+
+                    <div>
+                        <p>Total de Turmas</p>
+                        <h3 id="dashTotalTurmas">0</h3>
+                    </div>
+
+                </div>
+
+
+                <div class="metric-card">
+
+                    <div class="metric-icon bg-indigo-100 text-indigo-600">
+                        <i class="fa-solid fa-user-graduate"></i>
+                    </div>
+
+                    <div>
+                        <p>Total de Alunos</p>
+                        <h3 id="dashTotalAlunos">0</h3>
+                    </div>
+
+                </div>
+
+
+                <div class="metric-card">
+
+                    <div class="metric-icon bg-green-100 text-green-600">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+
+                    <div>
+                        <p>Média de Frequência</p>
+                        <h3 id="dashMediaFreq">0%</h3>
+                    </div>
+
+                </div>
+
+
+                <div class="metric-card">
+
+                    <div class="metric-icon bg-amber-100 text-amber-600">
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
+
+                    <div>
+                        <p>Avaliações Pendentes</p>
+                        <h3 id="dashAvaliaPendente">0</h3>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- AGENDA -->
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm">
+
+                    <h3 class="font-bold text-lg mb-4">
+
+                        <i class="fa-solid fa-calendar-day text-blue-500 mr-2"></i>
+
+                        Próximas Aulas
+
+                    </h3>
+
+                    <div id="dashAgendaHoje" class="space-y-3"></div>
+
+                </div>
+
+
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm">
+
+                    <h3 class="font-bold text-lg mb-4">
+
+                        <i class="fa-solid fa-bell text-amber-500 mr-2"></i>
+
+                        Lembretes & Tarefas
+
+                    </h3>
+
+                    <div class="space-y-3 text-sm">
+
+                        <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-xl">
+                            Lançar notas do 3º Ano A
+                        </div>
+
+                        <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-xl">
+                            Preparar plano de aula
+                        </div>
+
+                        <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-xl">
+                            Reunião de Pais e Mestres
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= TURMAS ================= -->
+
+        <section id="tab-turmas"
+                 class="tab-content hidden space-y-6">
+
+            <div class="flex items-center justify-between">
+
+                <div>
+
+                    <h2 class="text-2xl font-bold">
+                        Minhas Turmas
+                    </h2>
+
+                    <p class="text-sm text-gray-500">
+                        Gerencie suas turmas e alunos
+                    </p>
+
+                </div>
+
+                <button
+                    onclick="openModal('modalTurma')"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-xl">
+
+                    <i class="fa-solid fa-plus mr-2"></i>
+                    Adicionar Turma
+
+                </button>
+
+            </div>
+
+            <div id="listaTurmas"
+                 class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+
+        </section>
+
+
+        <!-- ================= CHAMADA ================= -->
+
+        <section id="tab-chamada"
+                 class="tab-content hidden space-y-6">
+
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl">
+
+                <h2 class="text-2xl font-bold mb-5">
+                    Registro de Frequência
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+
+                    <select id="chamadaSelectTurma"
+                            onchange="carregarAlunosChamada()"
+                            class="p-3 border rounded-xl dark:bg-gray-700">
+                    </select>
+
+                    <input
+                        type="date"
+                        id="chamadaData"
+                        class="p-3 border rounded-xl dark:bg-gray-700">
+
+                    <button
+                        onclick="salvarChamada()"
+                        class="bg-green-600 text-white rounded-xl">
+
+                        <i class="fa-solid fa-floppy-disk mr-2"></i>
+                        Salvar Chamada
+
+                    </button>
+
+                </div>
+
+                <div class="overflow-x-auto">
+
+                    <table class="w-full">
+
+                        <thead>
+
+                            <tr class="border-b text-left">
+
+                                <th class="p-3">Nº</th>
+                                <th class="p-3">Aluno</th>
+                                <th class="p-3 text-center">
+                                    Presença
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="tabelaChamada"></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= AVALIAÇÕES ================= -->
+
+        <section id="tab-avaliacoes"
+                 class="tab-content hidden space-y-6">
+
+            <div class="flex items-center justify-between">
+
+                <div>
+
+                    <h2 class="text-2xl font-bold">
+                        Avaliações & Notas
+                    </h2>
+
+                    <p class="text-sm text-gray-500">
+                        Cadastre provas e trabalhos
+                    </p>
+
+                </div>
+
+                <button
+                    onclick="openModal('modalAvaliacao')"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-xl">
+
+                    <i class="fa-solid fa-plus mr-2"></i>
+                    Nova Avaliação
+
+                </button>
+
+            </div>
+
+
+            <div class="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden">
+
+                <div class="p-4 border-b">
+
+                    <select
+                        id="avaliacoesSelectTurma"
+                        onchange="renderAvaliacoes()"
+                        class="p-2 border rounded-xl dark:bg-gray-700">
+                    </select>
+
+                </div>
+
+                <div class="overflow-x-auto">
+
+                    <table class="w-full">
+
+                        <thead>
+
+                            <tr class="bg-gray-50 dark:bg-gray-700 text-left">
+
+                                <th class="p-4">Título</th>
+                                <th class="p-4">Turma</th>
+                                <th class="p-4">Data</th>
+                                <th class="p-4">Peso</th>
+                                <th class="p-4 text-right">Ação</th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="tabelaAvaliacoes"></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= CALENDÁRIO ================= -->
+
+        <section id="tab-calendario"
+                 class="tab-content hidden space-y-6">
+
+            <h2 class="text-2xl font-bold">
+                Calendário Pedagógico
+            </h2>
+
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl">
+
+                <div class="grid grid-cols-7 gap-2 text-center
+                            font-bold text-sm text-gray-500 mb-4">
+
+                    <div>Dom</div>
+                    <div>Seg</div>
+                    <div>Ter</div>
+                    <div>Qua</div>
+                    <div>Qui</div>
+                    <div>Sex</div>
+                    <div>Sáb</div>
+
+                </div>
+
+                <div id="gradeCalendario"
+                     class="grid grid-cols-7 gap-2">
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================================================= -->
+        <!-- ================= RELATÓRIOS ==================== -->
+        <!-- ================================================= -->
+
+        <section id="tab-relatorios"
+                 class="tab-content hidden space-y-6">
+
+            <div>
+
+                <h2 class="text-2xl font-bold">
+                    Relatórios e Desempenho
+                </h2>
+
+                <p class="text-sm text-gray-500">
+                    Análise detalhada do rendimento escolar
+                </p>
+
+            </div>
+
+
+            <!-- DESEMPENHO POR TURMA -->
+
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm">
+
+                <div class="flex flex-col md:flex-row
+                            md:items-center justify-between gap-4 mb-6">
+
+                    <div>
+
+                        <h3 class="text-xl font-bold">
+                            Desempenho por Turma
+                        </h3>
+
+                        <p class="text-sm text-gray-500">
+                            Acompanhe o rendimento de cada turma
+                        </p>
+
+                    </div>
+
+                    <select
+                        id="filtroDesempenho"
+                        onchange="renderDesempenhoTurmas()"
+                        class="p-3 border rounded-xl dark:bg-gray-700">
+
+                        <option value="todas">
+                            Todas as turmas
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div id="desempenhoTurmas"
+                     class="space-y-5">
+                </div>
+
+            </div>
+
+
+            <!-- FREQUÊNCIA -->
+
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl">
+
+                <div class="mb-6">
+
+                    <h3 class="text-xl font-bold">
+                        Índice de Presença / Assiduidade
+                    </h3>
+
+                    <p class="text-sm text-gray-500">
+                        Frequência dos alunos por turma
+                    </p>
+
+                </div>
+
+                <div id="desempenhoFrequencia"
+                     class="space-y-5">
+                </div>
+
+            </div>
+
+
+            <!-- RESUMO -->
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+                <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl">
+
+                    <p class="text-sm text-gray-500">
+                        Média geral
+                    </p>
+
+                    <h3 id="relatorioMediaGeral"
+                        class="text-3xl font-bold text-blue-600">
+                        0.0
+                    </h3>
+
+                </div>
+
+
+                <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl">
+
+                    <p class="text-sm text-gray-500">
+                        Frequência geral
+                    </p>
+
+                    <h3 id="relatorioFrequenciaGeral"
+                        class="text-3xl font-bold text-green-600">
+                        0%
+                    </h3>
+
+                </div>
+
+
+                <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl">
+
+                    <p class="text-sm text-gray-500">
+                        Total de alunos
+                    </p>
+
+                    <h3 id="relatorioTotalAlunos"
+                        class="text-3xl font-bold text-indigo-600">
+                        0
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- ================= MODAL TURMA ================= -->
+
+<div id="modalTurma"
+     class="fixed inset-0 bg-black/50 hidden items-center
+            justify-center p-4 z-50">
+
+    <div class="bg-white dark:bg-gray-800 rounded-2xl
+                max-w-md w-full p-6">
+
+        <div class="flex justify-between mb-5">
+
+            <h3 class="text-xl font-bold">
+                Nova Turma
+            </h3>
+
+            <button onclick="closeModal('modalTurma')">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+
+        </div>
+
+        <form onsubmit="salvarTurma(event)"
+              class="space-y-4">
+
+            <input
+                type="text"
+                id="nomeTurma"
+                placeholder="Ex: 9º Ano A"
+                required
+                class="w-full p-3 border rounded-xl dark:bg-gray-700">
+
+            <input
+                type="text"
+                id="disciplinaTurma"
+                placeholder="Ex: Matemática"
+                required
+                class="w-full p-3 border rounded-xl dark:bg-gray-700">
+
+            <input
+                type="text"
+                id="horarioTurma"
+                placeholder="Ex: Segunda - 08:00"
+                required
+                class="w-full p-3 border rounded-xl dark:bg-gray-700">
+
+            <div class="flex justify-end gap-2">
+
+                <button type="button"
+                        onclick="closeModal('modalTurma')"
+                        class="px-4 py-2 rounded-xl">
+
+                    Cancelar
+
+                </button>
+
+                <button
+                    type="submit"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-xl">
+
+                    Salvar Turma
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- ================= MODAL AVALIAÇÃO ================= -->
+
+<div id="modalAvaliacao"
+     class="fixed inset-0 bg-black/50 hidden items-center
+            justify-center p-4 z-50">
+
+    <div class="bg-white dark:bg-gray-800 rounded-2xl
+                max-w-md w-full p-6">
+
+        <div class="flex justify-between mb-5">
+
+            <h3 class="text-xl font-bold">
+                Nova Avaliação
+            </h3>
+
+            <button onclick="closeModal('modalAvaliacao')">
+
+                <i class="fa-solid fa-xmark text-xl"></i>
+
+            </button>
+
+        </div>
+
+        <form onsubmit="salvarAvaliacao(event)"
+              class="space-y-4">
+
+            <input
+                type="text"
+                id="tituloAvaliacao"
+                placeholder="Ex: Prova Bimestral"
+                required
+                class="w-full p-3 border rounded-xl dark:bg-gray-700">
+
+            <select
+                id="modalSelectTurma"
+                required
+                class="w-full p-3 border rounded-xl dark:bg-gray-700">
+            </select>
+
+            <input
+                type="date"
+                id="dataAvaliacao"
+                required
+                class="w-full p-3 border rounded-xl dark:bg-gray-700">
+
+            <input
+                type="number"
+                id="pesoAvaliacao"
+                min="1"
+                max="10"
+                value="10"
+                required
+                class="w-full p-3 border rounded-xl dark:bg-gray-700">
+
+            <button
+                type="submit"
+                class="w-full bg-blue-600 text-white
+                       py-3 rounded-xl">
+
+                Criar Avaliação
+
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- ================= JAVASCRIPT ================= -->
+
+<script>
+
+let state = {
+
+    user: null,
+
+    turmas: [
+
+        {
+            id: 1,
+            nome: "3º Ano A",
+            disciplina: "Matemática",
+            horario: "Terça / Quarta / Quinta - 07:00 às 12:20",
+
+            alunos: [
+                "Ana Beatriz Pereira dos Santos",
+                "Ana Clara de Carvalho Nascimento",
+                "Anna Luiza Gomes da Silva",
+                "Aquiles Luiz Nunes Bastos",
+                "Cainan Bastos da Silva",
+                "Derick Luiz Caetano Miguel",
+                "Estella de Almeida Rosa",
+                "Francisco Gabriel de Oliveira Passos",
+                "Gloria Maria Moura Bruno de Carvalho",
+                "Heloisa Francisco Dionisio",
+                "Henry Guimarães Alves",
+                "Ingrid Rani Fortunato dos Santos",
+                "João Gabriel da Silva Pereira",
+                "João Pedro de Aquino Honorato",
+                "João Pedro Martins Ligabo",
+                "João Pedro Rodrigues dos Santos",
+                "Juan Pedro de Miranda",
+                "Julia de Moura Lopes da Silva",
+                "Marcos Vinicius Soriano Guatura",
+                "Maria Eduarda Felix Inocencio",
+                "Maria Isabel da Silva Costa Borges",
+                "Mariana de Souza Martins dos Santos",
+                "Mariana Silva de Andrade",
+                "Miguel Araujo de Godoi Freitas",
+                "Nathalia Alves Abdo Rezende",
+                "Neil Lopes João Filho",
+                "Nicolas Felipe do Nascimento Rosa",
+                "Pietro Henrique Gomes de Andrade",
+                "Samuel Rodrigues Costa Freire",
+                "Victor Hugo do Carmo de Jesus"
+            ],
+
+            media: 8.5,
+            frequencia: 95
+
+        },
+
+
+        {
+            id: 2,
+
+            nome: "3º Ano B",
+
+            disciplina: "Matemática",
+
+            horario: "Segunda / Quinta / Sexta - 07:00 às 12:20",
+
+            alunos: [
+                "Ágatha Gerônimo de Souza",
+                "Agatha Mytria Eugênio Galvão",
+                "Alicia Souza Reis Fabiano",
+                "Ana Clara da Silva Lopes",
+                "Ana Clara da Silva Rosa",
+                "Ana Clara Rodrigues",
+                "Anna Beatriz Gonzaga Fialho",
+                "Anna Carolina de Almeida",
+                "Anna Livia Rachel dos Santos",
+                "Bárbara Guatura Chagas",
+                "Gabriel Ivanildo Araujo de Carvalho",
+                "Gabriel Luiz Andrade de Oliveira",
+                "Gabriela dos Santos Cardoso Alves",
+                "José Luiz de Sousa Oliveira",
+                "Julia Helena Diniz da Silva",
+                "Jullia Bastos Ribeiro",
+                "Kalel da Cunha Souza Fernandes",
+                "Kauan da Silva Santos",
+                "Luiz Guilherme de Alcantara Silva",
+                "Maria Clara Dias Baesso",
+                "Marianny Orfão Terra",
+                "Melissa Espindola",
+                "Miguel de Oliveira Rodrigues da Silva",
+                "Murilo Gonçalves Parreiras Jannuzzelli",
+                "Natalia Aquino de Almeida",
+                "Nathan da Silva Santos",
+                "Nicoly Souza Marioto",
+                "Paola Diniz de Souza",
+                "Rafael Massao de Oliveira",
+                "Renata Ageu da Silva Cardoso",
+                "Yago Andrade Molina",
+                "Miguel da Silva Miranda Rodrigues"
+            ],
+
+            media: 7.2,
+            frequencia: 90
+
+        }
+
+
+    ],
+
+    avaliacoes: [
+
+        {
+            id: 1,
+            turmaId: 1,
+            titulo: "Prova Bimestral 1",
+            data: "2026-10-05",
+            peso: 10
+        },
+
+        {
+            id: 2,
+            turmaId: 2,
+            titulo: "Trabalho em Grupo",
+            data: "2026-10-12",
+            peso: 5
+        }
+
+    ],
+
+    chamadaStatus: {}
+
+};
+
+
+// ================= LOGIN =================
+
+function obterUsuarios() {
+    try {
+        return JSON.parse(localStorage.getItem("educlass_usuarios")) || [];
+    } catch (erro) {
+        console.error("Erro ao ler usuários:", erro);
+        return [];
+    }
+}
+
+function salvarUsuarios(usuarios) {
+    localStorage.setItem("educlass_usuarios", JSON.stringify(usuarios));
+}
+
+function mostrarMensagemAuth(tipo, mensagem) {
+    const loginMessage = document.getElementById("loginMessage");
+    const registerMessage = document.getElementById("registerMessage");
+    const elemento = tipo === "login" ? loginMessage : registerMessage;
+
+    if (!elemento) return;
+
+    elemento.textContent = mensagem;
+    elemento.className = "text-sm rounded-lg p-3 " +
+        (tipo === "erro"
+            ? "bg-red-100 text-red-700"
+            : "bg-green-100 text-green-700");
+}
+
+function limparMensagensAuth() {
+    ["loginMessage", "registerMessage"].forEach(id => {
+        const elemento = document.getElementById(id);
+        if (elemento) {
+            elemento.textContent = "";
+            elemento.className = "hidden text-sm rounded-lg p-3";
+        }
+    });
+}
+
+function toggleAuthMode() {
+    const loginForm = document.getElementById("loginForm");
+    const registerForm = document.getElementById("registerForm");
+
+    loginForm.classList.toggle("hidden");
+    registerForm.classList.toggle("hidden");
+    limparMensagensAuth();
+}
+
+function emailValido(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function handleAuth(event, type) {
+    event.preventDefault();
+    limparMensagensAuth();
+
+    if (type === "login") {
+        const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+        const password = document.getElementById("loginPassword").value;
+
+        if (!emailValido(email)) {
+            mostrarMensagemAuth("login", "Digite um e-mail válido, como professor@educlass.com.");
+            return;
+        }
+
+        if (password.length < 6) {
+            mostrarMensagemAuth("login", "A senha deve ter pelo menos 6 caracteres.");
+            return;
+        }
+
+        const usuarios = obterUsuarios();
+        const usuario = usuarios.find(user =>
+            user.email.toLowerCase() === email
+        );
+
+        if (!usuario) {
+            mostrarMensagemAuth("login", "Usuário não encontrado. Cadastre-se antes de entrar.");
+            return;
+        }
+
+        if (usuario.password !== password) {
+            mostrarMensagemAuth("login", "Senha incorreta. Tente novamente.");
+            return;
+        }
+
+        state.user = {
+            id: usuario.id,
+            name: usuario.name,
+            email: usuario.email
+        };
+
+        entrarNoSistema();
+        return;
+    }
+
+    const name = document.getElementById("regName").value.trim();
+    const email = document.getElementById("regEmail").value.trim().toLowerCase();
+    const password = document.getElementById("regPassword").value;
+
+    if (name.length < 3) {
+        mostrarMensagemAuth("register", "Digite seu nome completo.");
+        return;
+    }
+
+    if (!emailValido(email)) {
+        mostrarMensagemAuth("register", "Digite um e-mail válido, como professor@educlass.com.");
+        return;
+    }
+
+    if (password.length < 6) {
+        mostrarMensagemAuth("register", "A senha deve ter pelo menos 6 caracteres.");
+        return;
+    }
+
+    const usuarios = obterUsuarios();
+    const existe = usuarios.some(user =>
+        user.email.toLowerCase() === email
+    );
+
+    if (existe) {
+        mostrarMensagemAuth("register", "Este e-mail já está cadastrado. Faça login.");
+        return;
+    }
+
+    const novoUsuario = {
+        id: Date.now(),
+        name,
+        email,
+        password
+    };
+
+    usuarios.push(novoUsuario);
+    salvarUsuarios(usuarios);
+
+    document.getElementById("registerForm").reset();
+
+    document.getElementById("loginForm").classList.remove("hidden");
+    document.getElementById("registerForm").classList.add("hidden");
+
+    document.getElementById("loginEmail").value = email;
+    document.getElementById("loginPassword").value = "";
+
+    mostrarMensagemAuth("login", "Conta criada com sucesso! Agora faça login.");
+}
+
+function entrarNoSistema() {
+    document.getElementById("userName").textContent = state.user.name;
+    document.getElementById("userEmail").textContent = state.user.email;
+    document.getElementById("userAvatar").textContent =
+        state.user.name.charAt(0).toUpperCase();
+
+    document.getElementById("authContainer").classList.add("hidden");
+    document.getElementById("appContainer").classList.remove("hidden");
+
+    atualizarSistema();
+}
+
+function logout() {
+    state.user = null;
+
+    document.getElementById("appContainer").classList.add("hidden");
+    document.getElementById("authContainer").classList.remove("hidden");
+
+    document.getElementById("loginForm").reset();
+    document.getElementById("registerForm").reset();
+    document.getElementById("loginForm").classList.remove("hidden");
+    document.getElementById("registerForm").classList.add("hidden");
+    limparMensagensAuth();
+}
+
+// Usuário de demonstração para o primeiro acesso
+function criarUsuarioDemo() {
+    const usuarios = obterUsuarios();
+    const emailDemo = "professor@educlass.com";
+
+    const existe = usuarios.some(user =>
+        user.email.toLowerCase() === emailDemo
+    );
+
+    if (!existe) {
+        usuarios.push({
+            id: Date.now(),
+            name: "Professor EduClass",
+            email: emailDemo,
+            password: "123456"
+        });
+
+        salvarUsuarios(usuarios);
+    }
+}
+
+criarUsuarioDemo();
+
+
+// ================= DARK MODE =================
+
+function toggleDarkMode() {
+
+    document.documentElement.classList.toggle("dark");
+
+}
+
+
+// ================= NAVEGAÇÃO =================
+
+function switchTab(tab) {
+
+    document
+        .querySelectorAll(".tab-content")
+        .forEach(section => {
+
+            section.classList.add("hidden");
+
+        });
+
+
+    document
+        .getElementById("tab-" + tab)
+        .classList.remove("hidden");
+
+
+    document
+        .querySelectorAll(".nav-btn")
+        .forEach(button => {
+
+            button.classList.remove(
+                "text-blue-600",
+                "bg-blue-50"
+            );
+
+            button.classList.add("text-gray-600");
+
+        });
+
+
+    const active =
+        document.getElementById("nav-" + tab);
+
+    active.classList.add(
+        "text-blue-600",
+        "bg-blue-50"
+    );
+
+}
+
+
+// ================= ATUALIZAÇÃO GERAL =================
+
+function atualizarSistema() {
+
+    atualizarDashboard();
+
+    renderTurmas();
+
+    popularSelectsTurma();
+
+    carregarAlunosChamada();
+
+    renderAvaliacoes();
+
+    atualizarFiltroDesempenho();
+
+    renderDesempenhoTurmas();
+
+    renderDesempenhoFrequencia();
+
+    renderResumoRelatorio();
+
+    renderCalendario();
+
+}
+
+
+// ================= DASHBOARD =================
+
+function atualizarDashboard() {
+
+    document.getElementById("dashTotalTurmas")
+        .textContent = state.turmas.length;
+
+
+    const totalAlunos =
+        state.turmas.reduce(
+            (total, turma) =>
+                total + turma.alunos.length,
+            0
+        );
+
+
+    document.getElementById("dashTotalAlunos")
+        .textContent = totalAlunos;
+
+
+    const frequenciaMedia =
+        state.turmas.length
+            ? state.turmas.reduce(
+                (total, turma) =>
+                    total + turma.frequencia,
+                0
+            ) / state.turmas.length
+            : 0;
+
+
+    document.getElementById("dashMediaFreq")
+        .textContent =
+        frequenciaMedia.toFixed(1) + "%";
+
+
+    document.getElementById("dashAvaliaPendente")
+        .textContent =
+        state.avaliacoes.length;
+
+
+    document.getElementById("dashAgendaHoje")
+        .innerHTML = state.turmas.map(turma => `
+
+            <div class="flex items-center justify-between
+                        p-3 border rounded-xl">
+
+                <div>
+
+                    <p class="font-bold text-sm">
+                        ${turma.nome} - ${turma.disciplina}
+                    </p>
+
+                    <p class="text-xs text-gray-500">
+                        ${turma.horario}
+                    </p>
+
+                </div>
+
+                <span class="text-xs bg-gray-100
+                             dark:bg-gray-700 px-2 py-1 rounded-lg">
+
+                    ${turma.alunos.length} alunos
+
+                </span>
+
+            </div>
+
+        `).join("");
+
+}
+
+
+// ================= TURMAS =================
+
+function renderTurmas() {
+
+    const container =
+        document.getElementById("listaTurmas");
+
+
+    container.innerHTML =
+        state.turmas.map(turma => `
+
+            <div class="bg-white dark:bg-gray-800
+                        p-6 rounded-2xl shadow-sm
+                        border dark:border-gray-700">
+
+                <div class="flex justify-between">
+
+                    <div>
+
+                        <span class="text-xs font-semibold
+                                     px-2 py-1 rounded-lg
+                                     bg-blue-100 text-blue-600">
+
+                            ${turma.disciplina}
+
+                        </span>
+
+                        <h3 class="text-xl font-bold mt-2">
+                            ${turma.nome}
+                        </h3>
+
+                    </div>
+
+                    <button
+                        onclick="removerTurma(${turma.id})"
+                        class="text-red-500">
+
+                        <i class="fa-solid fa-trash"></i>
+
+                    </button>
+
+                </div>
+
+
+                <p class="text-sm text-gray-500 mt-3">
+
+                    <i class="fa-regular fa-clock mr-1"></i>
+
+                    ${turma.horario}
+
+                </p>
+
+
+                <div class="mt-4 pt-4 border-t">
+
+                    <p class="text-sm font-semibold">
+                        ${turma.alunos.length} alunos
+                    </p>
+
+                    <p class="text-xs text-gray-500 mt-2">
+
+                        Média:
+                        <strong>${turma.media.toFixed(1)}</strong>
+
+                        • Frequência:
+                        <strong>${turma.frequencia}%</strong>
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        `).join("");
+
+}
+
+
+function salvarTurma(event) {
+
+    event.preventDefault();
+
+
+    const novaTurma = {
+
+        id: Date.now(),
+
+        nome:
+            document.getElementById("nomeTurma").value,
+
+        disciplina:
+            document.getElementById("disciplinaTurma").value,
+
+        horario:
+            document.getElementById("horarioTurma").value,
+
+        alunos: [
+            "Aluno Exemplo 1",
+            "Aluno Exemplo 2",
+            "Aluno Exemplo 3"
+        ],
+
+        media: 0,
+
+        frequencia: 100
+
+    };
+
+
+    state.turmas.push(novaTurma);
+
+
+    atualizarSistema();
+
+
+    closeModal("modalTurma");
+
+    event.target.reset();
+
+}
+
+
+function removerTurma(id) {
+
+    state.turmas =
+        state.turmas.filter(turma =>
+            turma.id !== id
+        );
+
+
+    state.avaliacoes =
+        state.avaliacoes.filter(avaliacao =>
+            avaliacao.turmaId !== id
+        );
+
+
+    atualizarSistema();
+
+}
+
+
+// ================= SELECTS =================
+
+function popularSelectsTurma() {
+
+    const options =
+        state.turmas.map(turma => `
+
+            <option value="${turma.id}">
+                ${turma.nome} - ${turma.disciplina}
+            </option>
+
+        `).join("");
+
+
+    document.getElementById("chamadaSelectTurma")
+        .innerHTML = options;
+
+    document.getElementById("avaliacoesSelectTurma")
+        .innerHTML = options;
+
+    document.getElementById("modalSelectTurma")
+        .innerHTML = options;
+
+}
+
+
+// ================= CHAMADA =================
+
+function carregarAlunosChamada() {
+
+    const select =
+        document.getElementById("chamadaSelectTurma");
+
+
+    if (!select.value) return;
+
+
+    const turma =
+        state.turmas.find(
+            t => t.id === Number(select.value)
+        );
+
+
+    const tbody =
+        document.getElementById("tabelaChamada");
+
+
+    if (!turma) {
+
+        tbody.innerHTML = "";
+
+        return;
+
+    }
+
+
+    tbody.innerHTML =
+        turma.alunos.map((aluno, index) => `
+
+            <tr class="border-b dark:border-gray-700">
+
+                <td class="p-3">
+                    ${index + 1}
+                </td>
+
+                <td class="p-3 font-medium">
+                    ${aluno}
+                </td>
+
+                <td class="p-3 text-center">
+
+                    <button
+                        onclick="marcarPresenca(this, 'P')"
+                        class="px-3 py-1 bg-green-500
+                               text-white rounded-lg mr-1">
+
+                        P
+
+                    </button>
+
+                    <button
+                        onclick="marcarPresenca(this, 'F')"
+                        class="px-3 py-1 bg-gray-200
+                               rounded-lg mr-1">
+
+                        F
+
+                    </button>
+
+                    <button
+                        onclick="marcarPresenca(this, 'J')"
+                        class="px-3 py-1 bg-gray-200
+                               rounded-lg">
+
+                        J
+
+                    </button>
+
+                </td>
+
+            </tr>
+
+        `).join("");
+
+}
+
+
+function marcarPresenca(button, status) {
+
+    const botoes =
+        button.parentElement.querySelectorAll("button");
+
+
+    botoes.forEach(botao => {
+
+        botao.className =
+            "px-3 py-1 bg-gray-200 rounded-lg mr-1";
+
+    });
+
+
+    if (status === "P")
+        button.className =
+            "px-3 py-1 bg-green-500 text-white rounded-lg mr-1";
+
+    if (status === "F")
+        button.className =
+            "px-3 py-1 bg-red-500 text-white rounded-lg mr-1";
+
+    if (status === "J")
+        button.className =
+            "px-3 py-1 bg-amber-500 text-white rounded-lg mr-1";
+
+}
+
+
+function salvarChamada() {
+
+    alert("✅ Chamada salva com sucesso!");
+
+}
+
+
+// ================= AVALIAÇÕES =================
+
+function renderAvaliacoes() {
+
+    const select =
+        document.getElementById("avaliacoesSelectTurma");
+
+
+    if (!select.value) return;
+
+
+    const turmaId =
+        Number(select.value);
+
+
+    const lista =
+        state.avaliacoes.filter(
+            avaliacao =>
+                avaliacao.turmaId === turmaId
+        );
+
+
+    const tbody =
+        document.getElementById("tabelaAvaliacoes");
+
+
+    if (!lista.length) {
+
+        tbody.innerHTML = `
+
+            <tr>
+
+                <td colspan="5"
+                    class="p-6 text-center text-gray-400">
+
+                    Nenhuma avaliação cadastrada.
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    tbody.innerHTML =
+        lista.map(avaliacao => {
+
+            const turma =
+                state.turmas.find(
+                    t => t.id === avaliacao.turmaId
+                );
+
+
+            return `
+
+                <tr class="border-b dark:border-gray-700">
+
+                    <td class="p-4 font-semibold">
+                        ${avaliacao.titulo}
+                    </td>
+
+                    <td class="p-4">
+                        ${turma?.nome || ""}
+                    </td>
+
+                    <td class="p-4">
+                        ${avaliacao.data}
+                    </td>
+
+                    <td class="p-4">
+                        Peso ${avaliacao.peso}
+                    </td>
+
+                    <td class="p-4 text-right">
+
+                        <button
+                            onclick="removerAvaliacao(${avaliacao.id})"
+                            class="text-red-500">
+
+                            <i class="fa-solid fa-trash"></i>
+
+                        </button>
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        }).join("");
+
+}
+
+
+function salvarAvaliacao(event) {
+
+    event.preventDefault();
+
+
+    state.avaliacoes.push({
+
+        id: Date.now(),
+
+        titulo:
+            document.getElementById("tituloAvaliacao").value,
+
+        turmaId:
+            Number(
+                document.getElementById("modalSelectTurma").value
+            ),
+
+        data:
+            document.getElementById("dataAvaliacao").value,
+
+        peso:
+            Number(
+                document.getElementById("pesoAvaliacao").value
+            )
+
+    });
+
+
+    atualizarSistema();
+
+    closeModal("modalAvaliacao");
+
+    event.target.reset();
+
+}
+
+
+function removerAvaliacao(id) {
+
+    state.avaliacoes =
+        state.avaliacoes.filter(
+            avaliacao =>
+                avaliacao.id !== id
+        );
+
+
+    atualizarSistema();
+
+}
+
+
+// =====================================================
+// =============== DESEMPENHO POR TURMA ===============
+// =====================================================
+
+function atualizarFiltroDesempenho() {
+
+    const select =
+        document.getElementById("filtroDesempenho");
+
+
+    if (!select) return;
+
+
+    select.innerHTML = `
+
+        <option value="todas">
+            Todas as turmas
+        </option>
+
+        ${state.turmas.map(turma => `
+
+            <option value="${turma.id}">
+                ${turma.nome} - ${turma.disciplina}
+            </option>
+
+        `).join("")}
+
+    `;
+
+}
+
+
+function obterSituacao(media) {
+
+    if (media >= 8) {
+
+        return {
+
+            texto: "Excelente",
+
+            classe:
+                "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+
+            icone:
+                "fa-circle-check"
+
+        };
+
+    }
+
+
+    if (media >= 6) {
+
+        return {
+
+            texto: "Regular",
+
+            classe:
+                "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+
+            icone:
+                "fa-circle-exclamation"
+
+        };
+
+    }
+
+
+    return {
+
+        texto: "Atenção",
+
+        classe:
+            "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+
+        icone:
+            "fa-circle-xmark"
+
+    };
+
+}
+
+
+function renderDesempenhoTurmas() {
+
+    const container =
+        document.getElementById("desempenhoTurmas");
+
+
+    if (!container) return;
+
+
+    const filtro =
+        document.getElementById("filtroDesempenho").value;
+
+
+    let turmas =
+        state.turmas;
+
+
+    if (filtro !== "todas") {
+
+        turmas =
+            state.turmas.filter(
+                turma =>
+                    turma.id === Number(filtro)
+            );
+
+    }
+
+
+    if (!turmas.length) {
+
+        container.innerHTML = `
+
+            <div class="text-center py-10 text-gray-400">
+
+                Nenhuma turma encontrada.
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    container.innerHTML =
+        turmas.map(turma => {
+
+            const media =
+                Number(turma.media) || 0;
+
+            const frequencia =
+                Number(turma.frequencia) || 0;
+
+
+            const situacao =
+                obterSituacao(media);
+
+
+            const quantidadeAvaliacoes =
+                state.avaliacoes.filter(
+                    avaliacao =>
+                        avaliacao.turmaId === turma.id
+                ).length;
+
+
+            return `
+
+                <div class="border dark:border-gray-700
+                            rounded-2xl p-5">
+
+                    <!-- CABEÇALHO -->
+
+                    <div class="flex flex-col md:flex-row
+                                md:items-center justify-between
+                                gap-4 mb-5">
+
+                        <div class="flex items-center gap-3">
+
+                            <div class="w-12 h-12 rounded-xl
+                                        bg-blue-100
+                                        dark:bg-blue-900/30
+                                        text-blue-600
+                                        flex items-center justify-center">
+
+                                <i class="fa-solid fa-users text-xl"></i>
+
+                            </div>
+
+                            <div>
+
+                                <h4 class="text-lg font-bold">
+                                    ${turma.nome}
+                                </h4>
+
+                                <p class="text-sm text-gray-500">
+                                    ${turma.disciplina}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <span class="px-3 py-1.5 rounded-lg
+                                     text-xs font-bold
+                                     ${situacao.classe}">
+
+                            <i class="fa-solid
+                                      ${situacao.icone} mr-1"></i>
+
+                            ${situacao.texto}
+
+                        </span>
+
+                    </div>
+
+
+                    <!-- MÉTRICAS -->
+
+                    <div class="grid grid-cols-2 md:grid-cols-4
+                                gap-3 mb-6">
+
+                        <div class="bg-gray-50
+                                    dark:bg-gray-700/40
+                                    p-4 rounded-xl">
+
+                            <p class="text-xs text-gray-500">
+                                Média
+                            </p>
+
+                            <p class="text-2xl font-bold
+                                      text-blue-600">
+
+                                ${media.toFixed(1)}
+
+                            </p>
+
+                        </div>
+
+
+                        <div class="bg-gray-50
+                                    dark:bg-gray-700/40
+                                    p-4 rounded-xl">
+
+                            <p class="text-xs text-gray-500">
+                                Frequência
+                            </p>
+
+                            <p class="text-2xl font-bold
+                                      text-green-600">
+
+                                ${frequencia}%
+
+                            </p>
+
+                        </div>
+
+
+                        <div class="bg-gray-50
+                                    dark:bg-gray-700/40
+                                    p-4 rounded-xl">
+
+                            <p class="text-xs text-gray-500">
+                                Alunos
+                            </p>
+
+                            <p class="text-2xl font-bold">
+                                ${turma.alunos.length}
+                            </p>
+
+                        </div>
+
+
+                        <div class="bg-gray-50
+                                    dark:bg-gray-700/40
+                                    p-4 rounded-xl">
+
+                            <p class="text-xs text-gray-500">
+                                Avaliações
+                            </p>
+
+                            <p class="text-2xl font-bold">
+                                ${quantidadeAvaliacoes}
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- MÉDIA -->
+
+                    <div class="mb-5">
+
+                        <div class="flex justify-between
+                                    text-sm font-semibold mb-2">
+
+                            <span>
+                                Média da turma
+                            </span>
+
+                            <span>
+                                ${media.toFixed(1)} / 10
+                            </span>
+
+                        </div>
+
+
+                        <div class="w-full h-3
+                                    bg-gray-200
+                                    dark:bg-gray-700
+                                    rounded-full overflow-hidden">
+
+                            <div
+                                class="h-full bg-blue-600
+                                       rounded-full transition-all"
+                                style="width:${media * 10}%">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- FREQUÊNCIA -->
+
+                    <div>
+
+                        <div class="flex justify-between
+                                    text-sm font-semibold mb-2">
+
+                            <span>
+                                Frequência
+                            </span>
+
+                            <span>
+                                ${frequencia}%
+                            </span>
+
+                        </div>
+
+
+                        <div class="w-full h-3
+                                    bg-gray-200
+                                    dark:bg-gray-700
+                                    rounded-full overflow-hidden">
+
+                            <div
+                                class="h-full bg-green-500
+                                       rounded-full transition-all"
+                                style="width:${frequencia}%">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            `;
+
+        }).join("");
+
+}
+
+
+// ================= FREQUÊNCIA =================
+
+function renderDesempenhoFrequencia() {
+
+    const container =
+        document.getElementById("desempenhoFrequencia");
+
+
+    if (!container) return;
+
+
+    container.innerHTML =
+        state.turmas.map(turma => {
+
+            const frequencia =
+                Number(turma.frequencia) || 0;
+
+
+            let barra = "bg-green-500";
+            let texto = "text-green-600";
+
+
+            if (frequencia < 75) {
+
+                barra = "bg-red-500";
+                texto = "text-red-600";
+
+            } else if (frequencia < 85) {
+
+                barra = "bg-amber-500";
+                texto = "text-amber-600";
+
+            }
+
+
+            return `
+
+                <div>
+
+                    <div class="flex justify-between
+                                text-sm font-semibold mb-2">
+
+                        <span>
+                            ${turma.nome}
+                        </span>
+
+                        <span class="${texto}">
+                            ${frequencia}%
+                        </span>
+
+                    </div>
+
+
+                    <div class="w-full h-3
+                                bg-gray-200
+                                dark:bg-gray-700
+                                rounded-full overflow-hidden">
+
+                        <div
+                            class="${barra} h-full
+                                   rounded-full"
+                            style="width:${frequencia}%">
+                        </div>
+
+                    </div>
+
+
+                    <p class="text-xs text-gray-400 mt-1">
+
+                        ${turma.alunos.length}
+                        alunos matriculados
+
+                    </p>
+
+                </div>
+
+            `;
+
+        }).join("");
+
+}
+
+
+// ================= RESUMO =================
+
+function renderResumoRelatorio() {
+
+    if (!state.turmas.length) return;
+
+
+    const media =
+        state.turmas.reduce(
+            (total, turma) =>
+                total + Number(turma.media || 0),
+            0
+        ) / state.turmas.length;
+
+
+    const frequencia =
+        state.turmas.reduce(
+            (total, turma) =>
+                total + Number(turma.frequencia || 0),
+            0
+        ) / state.turmas.length;
+
+
+    const alunos =
+        state.turmas.reduce(
+            (total, turma) =>
+                total + turma.alunos.length,
+            0
+        );
+
+
+    document.getElementById("relatorioMediaGeral")
+        .textContent =
+        media.toFixed(1);
+
+
+    document.getElementById("relatorioFrequenciaGeral")
+        .textContent =
+        frequencia.toFixed(1) + "%";
+
+
+    document.getElementById("relatorioTotalAlunos")
+        .textContent =
+        alunos;
+
+}
+
+
+// ================= CALENDÁRIO =================
+
+function renderCalendario() {
+
+    const grid =
+        document.getElementById("gradeCalendario");
+
+
+    if (!grid) return;
+
+
+    let html = "";
+
+
+    for (let dia = 1; dia <= 31; dia++) {
+
+        html += `
+
+            <div class="h-20 border
+                        dark:border-gray-700
+                        rounded-xl p-2">
+
+                <span class="text-sm font-semibold">
+                    ${dia}
+                </span>
+
+                ${
+                    dia === 15
+                    ? `
+                        <span class="block mt-2
+                                     text-xs bg-red-100
+                                     text-red-600 p-1
+                                     rounded">
+
+                            Feriado
+
+                        </span>
+                    `
+                    : ""
+                }
+
+            </div>
+
+        `;
+
+    }
+
+
+    grid.innerHTML = html;
+
+}
+
+
+// ================= MODAIS =================
+
+function openModal(id) {
+
+    const modal =
+        document.getElementById(id);
+
+
+    modal.classList.remove("hidden");
+
+    modal.classList.add("flex");
+
+}
+
+
+function closeModal(id) {
+
+    const modal =
+        document.getElementById(id);
+
+
+    modal.classList.add("hidden");
+
+    modal.classList.remove("flex");
+
+}
+
+
+// ================= INICIALIZAÇÃO =================
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const data =
+        document.getElementById("chamadaData");
+
+    if (data) {
+
+        data.value =
+            new Date().toISOString().split("T")[0];
+
+    }
+
+});
+
+</script>
+
+
+<!-- ================= ESTILOS ================= -->
+
+<style>
+
+.metric-card {
+
+    background: white;
+
+    padding: 20px;
+
+    border-radius: 16px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 16px;
+
+    box-shadow:
+        0 1px 3px rgba(0,0,0,0.05);
+
+}
+
+.dark .metric-card {
+
+    background: #1f2937;
+
+}
+
+.metric-card p {
+
+    font-size: 12px;
+
+    color: #6b7280;
+
+}
+
+.metric-card h3 {
+
+    font-size: 24px;
+
+    font-weight: bold;
+
+}
+
+.metric-icon {
+
+    width: 48px;
+
+    height: 48px;
+
+    border-radius: 12px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 20px;
+
+}
+
+</style>
+
+</body>
+</html>
